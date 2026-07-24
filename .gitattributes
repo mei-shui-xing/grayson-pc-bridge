@@ -3,3 +3,9 @@
 node_modules/ export-ignore
 dist/ export-ignore
 windows-ui/.venv/ export-ignore
+.claude/settings.local.json export-ignore
+.claude-plugin/ export-ignore
+.cursor-plugin/ export-ignore
+.mcp.json export-ignore
+plugins/claude/ export-ignore
+plugins/cursor/ export-ignore
