@@ -1,16 +1,16 @@
 {
-  "name": "@wonderwhy-er/desktop-commander",
-  "version": "0.2.46",
-  "description": "MCP server for terminal operations and file editing",
-  "mcpName": "io.github.wonderwhy-er/desktop-commander",
+  "name": "grayson-pc-bridge-alpha",
+  "version": "0.1.0-alpha.1",
+  "description": "Local alpha fork of Desktop Commander with a safety-gated Windows UI sidecar",
+  "mcpName": "local.grayson.pc-bridge-alpha",
   "license": "MIT",
-  "author": "Eduards Ruzga",
-  "homepage": "https://github.com/wonderwhy-er/DesktopCommanderMCP",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/wonderwhy-er/DesktopCommanderMCP.git"
+  "author": "Grayson PC Bridge contributors; based on Desktop Commander by Eduards Ruzga and contributors",
+  "fork": {
+    "upstreamName": "@wonderwhy-er/desktop-commander",
+    "upstreamVersion": "0.2.46",
+    "upstreamRepository": "https://github.com/wonderwhy-er/DesktopCommanderMCP.git",
+    "baseCommit": "1eccc8b"
   },
-  "bugs": "https://github.com/wonderwhy-er/DesktopCommanderMCP/issues",
   "type": "module",
   "engines": {
     "node": ">=18.0.0"
@@ -66,9 +66,6 @@
     "count-tokens": "npm run build && node scripts/count-tokens.js",
     "count-tokens:json": "npm run build && node scripts/count-tokens.js --json"
   },
-  "publishConfig": {
-    "access": "public"
-  },
   "keywords": [
     "mcp",
     "model-context-protocol",
@@ -89,7 +86,7 @@
     "file-operations"
   ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.9.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@opendocsg/pdf2md": "^0.2.2",
     "@supabase/supabase-js": "^2.89.0",
     "@tiptap/core": "^3.22.3",
@@ -104,11 +101,11 @@
     "cross-fetch": "^4.1.0",
     "exceljs": "^4.4.0",
     "fastest-levenshtein": "^1.0.16",
-    "file-type": "^21.1.1",
+    "file-type": "^21.3.4",
     "glob": "^10.3.10",
     "highlight.js": "^11.11.1",
     "isbinaryfile": "^5.0.4",
-    "markdown-it": "^14.1.0",
+    "markdown-it": "^14.3.0",
     "md-to-pdf": "^5.2.5",
     "open": "^10.2.0",
     "pdf-lib": "^1.17.1",
@@ -116,7 +113,7 @@
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.3",
     "tiptap-markdown": "^0.9.0",
     "unified": "^11.0.5",
     "unpdf": "^1.4.0",

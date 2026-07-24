@@ -55,3 +55,35 @@ function Test-ProcessId([object]$ProcessIdValue) {
     if ($null -eq $ProcessIdValue -or "$ProcessIdValue" -notmatch '^\d+$') { return $false }
     return $null -ne (Get-Process -Id ([int]$ProcessIdValue) -ErrorAction SilentlyContinue)
 }
+
+function Get-WindowsUiProcess {
+    $uiStatus = Read-JsonFile $UiStatusFile
+    if (-not (Test-ProcessId $uiStatus.uiPid)) { return $null }
+    $candidate = Get-CimInstance Win32_Process -Filter "ProcessId=$($uiStatus.uiPid)" -ErrorAction SilentlyContinue
+    if (-not $candidate) { return $null }
+    # uv-created venv launchers replace themselves with the managed Python
+    # binary, so the final child command line may not contain WindowsUiRoot.
+    # The PID comes from our private runtime status file; validate the module.
+    if ($candidate.Name -ne 'python.exe' -or $candidate.CommandLine -notmatch 'windows_ui\.server') {
+        return $null
+    }
+    return $candidate
+}
+
+function Get-ScreenshotHealth {
+    if (-not (Test-Path -LiteralPath $PythonExe)) {
+        return [pscustomobject]@{ ok = $false; error = 'Python 虚拟环境不存在' }
+    }
+    Push-Location $WindowsUiRoot
+    try {
+        $raw = & $PythonExe -m windows_ui.health 2>$null
+        if ($LASTEXITCODE -ne 0 -or -not $raw) {
+            return [pscustomobject]@{ ok = $false; error = '截图探针执行失败' }
+        }
+        return $raw | ConvertFrom-Json
+    } catch {
+        return [pscustomobject]@{ ok = $false; error = $_.Exception.Message }
+    } finally {
+        Pop-Location
+    }
+}

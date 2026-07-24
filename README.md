@@ -3,6 +3,14 @@
 > 中文安装与安全说明见 [`README.zh-CN.md`](README.zh-CN.md).
 > The original Desktop Commander documentation is preserved below; this fork is not the upstream npm release.
 
+## Grayson PC Bridge Alpha policy
+
+- **GPT-first, not GPT-only:** the bridge uses MCP and can be used by other compatible AI clients.
+- **Structured first, visual fallback:** use file, terminal, window and UI Automation tools before screenshot/coordinate actions.
+- **One input controller during Alpha:** only one AI/client may control the mouse and keyboard at a time. The in-process queue is not a computer-wide lock.
+- **Owner confirmation for sensitive actions:** publishing, sending, deletion, account/permission changes, purchases, payment, passwords and other sensitive steps must pause for the computer owner.
+- This fork is an Alpha and not a security sandbox. See [README.zh-CN.md](README.zh-CN.md) and [SECURITY.md](SECURITY.md).
+
 # Desktop Commander MCP
 ### Search, update, manage files and run terminal commands with AI
 

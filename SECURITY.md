@@ -1,5 +1,9 @@
 # Security Policy
 
+## Grayson Windows Alpha additions
+
+The Grayson fork adds screenshot and mouse/keyboard tools. During v0.1.0-alpha only one AI/client may control input at a time; the local queue is not a computer-wide lock. Screenshot/coordinate fallback is used only after structured file/window/UI Automation tools cannot complete the step. Sensitive actions—including sending, publishing, deletion, purchases, payment, account/permission changes and credential entry—require the computer owner's confirmation. Password fields, UAC and configured high-risk windows remain blocked by the sidecar.
+
 ## Security Model
 
 Desktop Commander is a privileged local automation tool. It lets an AI client you authorize read and write files and execute terminal commands on your machine. That capability is the point of the product — not a flaw.

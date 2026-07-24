@@ -69,6 +69,7 @@ windows-ui/test-results/*.jsonl
 
 # Grayson fork local state (never commit)
 .codex/
+.runtime/
 windows-ui/config/allowlist.json
 !windows-ui/config/allowlist.example.json
 windows-ui/test-results/

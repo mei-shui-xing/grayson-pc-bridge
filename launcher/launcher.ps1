@@ -16,9 +16,17 @@ try {
 
     $existing = Get-BridgeProcess
     if ($existing) {
-        Write-Host "电脑助手已经在运行（PID $($existing.ProcessId)），不会重复启动。" -ForegroundColor Yellow
-        & (Join-Path $PSScriptRoot 'status.ps1') -NoPause
-        exit 0
+        $existingUi = Get-WindowsUiProcess
+        if ($existingUi) {
+            Write-Host "电脑助手已经完整运行（Node PID $($existing.ProcessId)，Windows UI PID $($existingUi.ProcessId)），不会重复启动。" -ForegroundColor Yellow
+            & (Join-Path $PSScriptRoot 'status.ps1') -NoPause
+            exit 0
+        }
+
+        Write-Host "检测到 Node 主桥仍在运行，但 Windows UI 侧车缺失；将只重启本助手进程树以恢复完整能力。" -ForegroundColor Yellow
+        & (Join-Path $PSScriptRoot 'stop.ps1')
+        $existing = Get-BridgeProcess
+        if ($existing) { throw "旧 Node 主桥未能退出（PID $($existing.ProcessId)）。" }
     }
 
     $legacy = Get-CimInstance Win32_Process | Where-Object {
@@ -59,12 +67,17 @@ try {
         }
         $bridgeStatus = Read-JsonFile $BridgeStatusFile
         $uiStatus = Read-JsonFile $UiStatusFile
-        if ($bridgeStatus -and $bridgeStatus.bridgePid -eq $bridge.Id -and $bridgeStatus.connected -eq $true -and (Test-ProcessId $uiStatus.uiPid)) {
+        if ($bridgeStatus -and $bridgeStatus.bridgePid -eq $bridge.Id -and $bridgeStatus.connected -eq $true -and (Get-WindowsUiProcess)) {
+            $screenshotHealth = Get-ScreenshotHealth
+            if (-not $screenshotHealth.ok) {
+                throw "Windows UI 已启动，但截图健康检查失败：$($screenshotHealth.error)"
+            }
             Write-Host ''
             Write-Host '🟢 Windows UI：允许远程控制' -ForegroundColor Green
             Write-Host "设备名称：$($bridgeStatus.deviceName)"
             Write-Host "远程状态：在线（HTTPS/WSS 端口 $($bridgeStatus.remotePort)）"
             Write-Host "UI 通道：$($bridgeStatus.uiTransport)（PID $($uiStatus.uiPid)）"
+            Write-Host "截图能力：正常（$($screenshotHealth.backend)）"
             Write-Host "已注册工具：$($bridgeStatus.toolCount)"
             Write-Host ''
             Write-Host '现在可以让 ChatGPT 操作电脑' -ForegroundColor Green

@@ -5,7 +5,8 @@ $bridge = Get-BridgeProcess
 $bridgeStatus = Read-JsonFile $BridgeStatusFile
 $uiStatus = Read-JsonFile $UiStatusFile
 $bridgeRunning = $null -ne $bridge
-$uiRunning = Test-ProcessId $uiStatus.uiPid
+$uiProcess = Get-WindowsUiProcess
+$uiRunning = $null -ne $uiProcess
 
 Write-Host '=== Grayson电脑助手运行状态 ===' -ForegroundColor Cyan
 Write-Host ("本地项目桥：{0}" -f $(if ($bridgeRunning) { "运行中（PID $($bridge.ProcessId)）" } else { '未运行' })) -ForegroundColor $(if ($bridgeRunning) { 'Green' } else { 'Red' })
@@ -17,8 +18,20 @@ if ($uiStatus -and $uiRunning) {
     $label = switch ($uiStatus.state) { 'active' { '绿色：允许远程控制' } 'paused' { '黄色：只允许查看' } default { '红色：已停止' } }
     Write-Host "控制状态：$label" -ForegroundColor $color
     Write-Host "紧急快捷键：$($uiStatus.emergencyHotkey)"
+    Write-Host "暂停/急停原因：$($uiStatus.reason)"
 } else {
     Write-Host '控制状态：不可用（Windows UI 模块未运行）' -ForegroundColor Red
+}
+
+if ($uiRunning) {
+    $screenshotHealth = Get-ScreenshotHealth
+    if ($screenshotHealth.ok) {
+        Write-Host "截图能力：正常（后端 $($screenshotHealth.backend)，探针 $($screenshotHealth.pixelSize.width)x$($screenshotHealth.pixelSize.height)）" -ForegroundColor Green
+    } else {
+        Write-Host "截图能力：失败（$($screenshotHealth.error)）" -ForegroundColor Red
+    }
+} else {
+    Write-Host '截图能力：不可用（Windows UI 侧车未运行）' -ForegroundColor Red
 }
 
 if ($uiRunning -and (Test-Path -LiteralPath $PythonExe)) {

@@ -195,7 +195,28 @@ class ConfigManager {
    * own independent fs.writeFile of the same path.
    */
   private async writeConfigToDisk(): Promise<void> {
-    await fs.writeFile(this.configPath, JSON.stringify(this.config, null, 2), 'utf8');
+    const configDir = path.dirname(this.configPath);
+    const tempPath = path.join(
+      configDir,
+      `.${path.basename(this.configPath)}.${process.pid}.${Date.now()}.tmp`,
+    );
+    const payload = JSON.stringify(this.config, null, 2);
+    let handle: fs.FileHandle | undefined;
+
+    try {
+      handle = await fs.open(tempPath, 'wx', 0o600);
+      await handle.writeFile(payload, 'utf8');
+      await handle.sync();
+      await handle.close();
+      handle = undefined;
+
+      // rename is atomic on the supported local filesystems. A crash can now
+      // leave only a harmless temporary file, never a truncated config.json.
+      await fs.rename(tempPath, this.configPath);
+    } finally {
+      await handle?.close().catch(() => {});
+      await fs.rm(tempPath, { force: true }).catch(() => {});
+    }
   }
 
   /**

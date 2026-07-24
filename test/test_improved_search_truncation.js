@@ -1,5 +1,6 @@
 // Test script to verify improved search result behavior using new streaming API
 import { handleStartSearch, handleGetMoreSearchResults, handleStopSearch } from '../dist/handlers/search-handlers.js';
+import fs from 'node:fs';
 
 /**
  * Helper function to wait for search completion and get all results
@@ -46,10 +47,12 @@ async function searchAndWaitForCompletion(searchArgs, timeout = 30000) {
 async function testImprovedSearchTruncation() {
     try {
         console.log('Testing improved search result behavior with streaming API...');
+        fs.mkdirSync('test/test_output', { recursive: true });
+        fs.writeFileSync('test/test_output/search-fixture.txt', 'const fixture = function () { return true; };\n'.repeat(200));
         
         // Test search that will produce many results to trigger potential limits
         const searchArgs = {
-            path: '.',
+            path: 'test/test_output',
             pattern: '.',  // Match almost every line - this should be a lot of results
             searchType: 'content',
             maxResults: 50000,  // Very high limit to get lots of results, but may be capped
@@ -102,6 +105,7 @@ async function testImprovedSearchTruncation() {
         
     } catch (error) {
         console.error('Test failed:', error);
+        throw error;
     }
 }
 

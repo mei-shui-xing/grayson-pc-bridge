@@ -1,25 +1,26 @@
 import assert from 'assert';
-import { execSync } from 'child_process';
+import { spawnSync } from 'child_process';
 import { startProcess, readProcessOutput, forceTerminate, interactWithProcess } from '../dist/tools/improved-process-tools.js';
 
 /**
  * Determines the correct python command to use
- * @returns {string} 'python3' or 'python'
+ * @returns {string | null} a shell-safe Python command, or null when absent
  */
 function getPythonCommand() {
-  try {
-    // Prefer python3 if available
-    execSync('command -v python3', { stdio: 'ignore' });
-    return 'python3';
-  } catch (e) {
-    // Fallback to python
-    try {
-      execSync('command -v python', { stdio: 'ignore' });
-      return 'python';
-    } catch (error) {
-      throw new Error('Neither python3 nor python command is available in the PATH');
-    }
+  const candidates = process.platform === 'win32'
+    ? [{ executable: 'python', args: ['--version'], command: 'python' },
+       { executable: 'py', args: ['-3', '--version'], command: 'py -3' }]
+    : [{ executable: 'python3', args: ['--version'], command: 'python3' },
+       { executable: 'python', args: ['--version'], command: 'python' }];
+
+  for (const candidate of candidates) {
+    const probe = spawnSync(candidate.executable, candidate.args, {
+      stdio: 'ignore',
+      windowsHide: true,
+    });
+    if (probe.status === 0) return candidate.command;
   }
+  return null;
 }
 
 
@@ -30,6 +31,10 @@ async function testEnhancedREPL() {
   console.log('Testing enhanced REPL functionality...');
   
   const pythonCommand = getPythonCommand();
+  if (!pythonCommand) {
+    console.log('SKIP: Python is not available in PATH; enhanced REPL requires an external interpreter.');
+    return true;
+  }
   console.log(`Using python command: ${pythonCommand}`);
 
   // Start Python in interactive mode
@@ -37,7 +42,7 @@ async function testEnhancedREPL() {
   const result = await startProcess({
     command: `${pythonCommand} -i`,
     timeout_ms: 10000,
-    shell: '/bin/bash'
+    shell: process.platform === 'win32' ? (process.env.ComSpec || 'cmd.exe') : '/bin/bash'
   });
   
   console.log('Result from start_process:', result);

@@ -1,5 +1,9 @@
 # Grayson PC Bridge
 
+> **v0.1.0-alpha 使用原则**：本项目是 **GPT-first, not GPT-only** 的 MCP 分支。默认先使用文件、终端、窗口和 UI Automation 等结构化工具；只有结构化能力无法识别自绘页面、弹窗或控件时，才使用截图和坐标视觉兜底。
+>
+> Alpha 阶段没有电脑级全局租约。任何时刻只允许一个 AI/客户端操作鼠标键盘；ChatGPT、Codex、Computer Use 或其他模型不得并发抢占。发布、发送、删除、账号/权限变更、购买、支付、密码等敏感操作必须暂停并由主人确认。
+
 这是基于 `wonderwhy-er/DesktopCommanderMCP` 的 Windows 修改分支。它保留上游的文件、终端和进程工具，并增加一个受安全白名单约束的 Windows UI sidecar，让远程 ChatGPT 能读取窗口、截图并执行鼠标键盘操作。
 
 上游项目、作者归属和 MIT 许可证必须保留。本分支只在 GitHub 分发源码，不使用上游 npm 包名发布。
