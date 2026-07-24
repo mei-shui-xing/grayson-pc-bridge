@@ -1,3 +1,8 @@
+> [!IMPORTANT]
+> This checkout contains the **Grayson PC Bridge** Windows remote-control fork.
+> 中文安装与安全说明见 [`README.zh-CN.md`](README.zh-CN.md).
+> The original Desktop Commander documentation is preserved below; this fork is not the upstream npm release.
+
 # Desktop Commander MCP
 ### Search, update, manage files and run terminal commands with AI
 

@@ -1,0 +1,80 @@
+{
+  "allowed_processes": [
+    "Code.exe",
+    "notepad.exe",
+    "explorer.exe",
+    "chrome.exe",
+    "msedge.exe",
+    "WindowsTerminal.exe"
+  ],
+  "conditional_processes": [
+    "cmd.exe",
+    "powershell.exe",
+    "pwsh.exe"
+  ],
+  "allowed_window_title_patterns": [
+    "Visual Studio Code",
+    "Notepad",
+    "File Explorer",
+    "Google Chrome",
+    "Microsoft Edge",
+    "Windows Terminal",
+    "Grayson电脑助手",
+    "Grayson-PC-Bridge"
+  ],
+  "forbidden_processes": [
+    "CredentialUIBroker.exe",
+    "consent.exe",
+    "LogonUI.exe",
+    "WeChat.exe",
+    "WXWork.exe",
+    "QQ.exe",
+    "QQNT.exe",
+    "1Password.exe",
+    "Bitwarden.exe",
+    "KeePass.exe",
+    "KeePassXC.exe"
+  ],
+  "forbidden_window_title_patterns": [
+    "Windows 安全中心",
+    "Windows Security",
+    "用户账户控制",
+    "User Account Control",
+    "密码",
+    "Password",
+    "付款",
+    "支付",
+    "充值",
+    "银行",
+    "确认购买",
+    "Checkout",
+    "Payment",
+    "Banking",
+    "登录",
+    "Sign in",
+    "Log in",
+    "微信",
+    "WeChat",
+    "QQ",
+    "账户设置",
+    "Account settings",
+    "保存密码",
+    "Save password"
+  ],
+  "blocked_hotkeys": [
+    "ALT+F4",
+    "CTRL+ALT+DELETE",
+    "CTRL+SHIFT+ESC",
+    "WIN+R",
+    "WIN+X",
+    "WIN+I",
+    "WIN+L"
+  ],
+  "emergency_hotkey": "CTRL+ALT+PAUSE",
+  "emergency_hotkey_fallback": "CTRL+ALT+F12",
+  "log_retention_days": 14,
+  "max_batch_actions": 100,
+  "max_wait_milliseconds": 30000,
+  "max_snapshot_nodes": 250,
+  "max_snapshot_depth": 8
+}

@@ -58,3 +58,17 @@ test_files/
 test_fix.js
 test_search.js
 .ripgrep-downloads/
+
+# Windows desktop-control sidecar local state
+windows-ui/.venv/
+windows-ui/.pytest_cache/
+windows-ui/**/__pycache__/
+windows-ui/runtime/
+windows-ui/test-results/runtime/
+windows-ui/test-results/*.jsonl
+
+# Grayson fork local state (never commit)
+.codex/
+windows-ui/config/allowlist.json
+!windows-ui/config/allowlist.example.json
+windows-ui/test-results/

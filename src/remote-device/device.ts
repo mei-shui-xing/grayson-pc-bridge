@@ -21,6 +21,10 @@ export class MCPDevice {
     private configPath: string;
     private persistSession: boolean;
     private desktop: DesktopCommanderIntegration;
+    private runtimeStatusPath: string;
+    private lastError: string | null = null;
+    private toolCount: number = 0;
+    private stopRequestInterval: NodeJS.Timeout | null = null;
 
     constructor(options: MCPDeviceOptions = {}) {
         this.baseServerUrl = process.env.MCP_SERVER_URL || 'https://mcp.desktopcommander.app';
@@ -28,13 +32,70 @@ export class MCPDevice {
         this.deviceId = undefined;
         this.isShuttingDown = false;
         this.configPath = path.join(os.homedir(), '.desktop-commander-device', 'device.json');
+        const runtimeDir = process.env.GRAYSON_ASSISTANT_RUNTIME_DIR
+            || path.join(os.homedir(), '.desktop-commander-device', 'runtime');
+        this.runtimeStatusPath = path.join(runtimeDir, 'bridge-status.json');
         this.persistSession = options.persistSession || false;
 
         // Initialize desktop integration
         this.desktop = new DesktopCommanderIntegration();
+        this.remoteChannel.setStatusListener(async (status) => {
+            await this.writeRuntimeStatus({
+                status: status === 'online' ? 'online' : 'reconnecting',
+                connected: status === 'online'
+            });
+        });
 
         // Graceful shutdown handlers (only set once)
         this.setupShutdownHandlers();
+    }
+
+    private async writeRuntimeStatus(extra: Record<string, unknown> = {}) {
+        try {
+            let previous: Record<string, unknown> = {};
+            try {
+                previous = JSON.parse(await fs.readFile(this.runtimeStatusPath, 'utf8'));
+            } catch { /* first write */ }
+
+            const status = {
+                ...previous,
+                bridgePid: process.pid,
+                deviceId: this.deviceId || null,
+                deviceName: os.hostname(),
+                remoteUrl: this.baseServerUrl,
+                remotePort: 443,
+                uiTransport: 'stdio',
+                toolCount: this.toolCount,
+                lastError: this.lastError,
+                updatedAt: new Date().toISOString(),
+                ...extra
+            };
+            await fs.mkdir(path.dirname(this.runtimeStatusPath), { recursive: true });
+            const tempPath = `${this.runtimeStatusPath}.${process.pid}.tmp`;
+            await fs.writeFile(tempPath, JSON.stringify(status, null, 2), 'utf8');
+            await fs.rm(this.runtimeStatusPath, { force: true });
+            await fs.rename(tempPath, this.runtimeStatusPath);
+        } catch (error: any) {
+            console.debug('[DEBUG] Failed to write runtime status:', error?.message || error);
+        }
+    }
+
+    private startStopRequestWatcher() {
+        const stopRequestPath = path.join(path.dirname(this.runtimeStatusPath), 'stop-request.json');
+        this.stopRequestInterval = setInterval(async () => {
+            if (this.isShuttingDown) return;
+            try {
+                await fs.access(stopRequestPath);
+                await fs.rm(stopRequestPath, { force: true });
+                console.log('🛑 Local launcher requested shutdown');
+                await this.shutdown();
+                process.exit(0);
+            } catch (error: any) {
+                if (error?.code !== 'ENOENT') {
+                    console.debug('[DEBUG] Stop request watcher error:', error?.message || error);
+                }
+            }
+        }, 500);
     }
 
     private setupShutdownHandlers() {
@@ -90,6 +151,8 @@ export class MCPDevice {
     async start() {
         try {
             console.log('🚀 Starting MCP Device...');
+            await this.writeRuntimeStatus({ status: 'starting', connected: false, startedAt: new Date().toISOString() });
+            this.startStopRequestWatcher();
             if (process.env.DEBUG_MODE === 'true') {
                 console.log(`  - 🐞 DEBUG_MODE`);
             }
@@ -155,8 +218,10 @@ export class MCPDevice {
             const deviceName = os.hostname();
 
             // Register as device
+            const clientTools = await this.desktop.listClientTools();
+            this.toolCount = clientTools.tools?.length || 0;
             await this.remoteChannel.registerDevice(
-                await this.desktop.listClientTools(),
+                clientTools,
                 this.deviceId,
                 deviceName,
                 (payload: any) => this.handleNewToolCall(payload)
@@ -166,16 +231,19 @@ export class MCPDevice {
             console.log(`   - User:         ${this.remoteChannel.user!.email}`);
             console.log(`   - Device ID:    ${this.deviceId}`);
             console.log(`   - Device Name:  ${deviceName}`);
+            await this.writeRuntimeStatus({ status: 'online', connected: true, readyAt: new Date().toISOString() });
 
             // Keep process alive
             this.remoteChannel.startHeartbeat(this.deviceId!);
 
         } catch (error: any) {
+            this.lastError = error.message;
             console.error(' - ❌ Device startup failed:', error.message);
             if (error.stack && process.env.DEBUG_MODE === 'true') {
                 console.error('Stack trace:', error.stack);
             }
             await captureRemote('remote_device_startup_failed', { error });
+            await this.writeRuntimeStatus({ status: 'error', connected: false });
             await this.shutdown();
             process.exit(1);
         }
@@ -326,6 +394,11 @@ export class MCPDevice {
         }
 
         this.isShuttingDown = true;
+        if (this.stopRequestInterval) {
+            clearInterval(this.stopRequestInterval);
+            this.stopRequestInterval = null;
+        }
+        await this.writeRuntimeStatus({ status: 'stopping', connected: false });
         console.log('\n🛑 Shutting down device...');
         console.debug('[DEBUG] Shutdown initiated for device:', this.deviceId);
 
@@ -353,11 +426,14 @@ export class MCPDevice {
             console.log('  ✓ Desktop integration shut down');
 
             console.log('✓ Device shutdown complete');
+            await this.writeRuntimeStatus({ status: 'stopped', connected: false, stoppedAt: new Date().toISOString() });
             console.debug('[DEBUG] Shutdown sequence completed successfully');
         } catch (error: any) {
+            this.lastError = error.message;
             console.error('Shutdown error:', error.message);
             console.debug('[DEBUG] Shutdown error stack:', error.stack);
             await captureRemote('remote_device_shutdown_error', { error });
+            await this.writeRuntimeStatus({ status: 'error', connected: false });
         }
     }
 }

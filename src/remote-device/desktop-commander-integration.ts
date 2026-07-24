@@ -19,6 +19,10 @@ interface McpConfig {
 export class DesktopCommanderIntegration {
     private mcpClient: Client | null = null;
     private mcpTransport: StdioClientTransport | null = null;
+    private windowsUiClient: Client | null = null;
+    private windowsUiTransport: StdioClientTransport | null = null;
+    private windowsUiToolNames: Set<string> = new Set();
+    private windowsUiCallChain: Promise<void> = Promise.resolve();
     private isReady: boolean = false;
 
     async initialize() {
@@ -58,16 +62,76 @@ export class DesktopCommanderIntegration {
             // Connect to Desktop Commander
             console.debug('[DEBUG] Connecting MCP client to transport');
             await this.mcpClient.connect(this.mcpTransport);
-            this.isReady = true;
-
             console.log(' - 🔌 Connected to Desktop Commander MCP');
             console.debug('[DEBUG] Desktop Commander MCP connection successful');
+
+            await this.initializeWindowsUi();
+            this.isReady = true;
 
         } catch (error) {
             console.error(' - ❌ Failed to connect to Desktop Commander MCP:', error);
             console.debug('[DEBUG] MCP connection error:', error);
             await captureRemote('desktop_integration_init_failed', { error });
             throw error;
+        }
+    }
+
+    private resolveWindowsUiConfig(): McpConfig | null {
+        const python = process.env.DC_WINDOWS_UI_PYTHON;
+        const root = process.env.DC_WINDOWS_UI_ROOT;
+        if (!python || !root) {
+            return null;
+        }
+
+        return {
+            command: python,
+            args: ['-m', 'windows_ui.server'],
+            cwd: root,
+            env: {
+                PYTHONUNBUFFERED: '1',
+                WINDOWS_UI_ROOT: root,
+                WINDOWS_UI_CONFIG: process.env.WINDOWS_UI_CONFIG || path.join(root, 'config', 'allowlist.json'),
+                WINDOWS_UI_RUNTIME_DIR: process.env.WINDOWS_UI_RUNTIME_DIR || path.join(root, 'runtime'),
+                WINDOWS_UI_LOG_DIR: process.env.WINDOWS_UI_LOG_DIR || path.join(root, 'logs')
+            }
+        };
+    }
+
+    private async initializeWindowsUi() {
+        const config = this.resolveWindowsUiConfig();
+        const required = process.env.DC_WINDOWS_UI_REQUIRED === 'true';
+        if (!config) {
+            if (required) {
+                throw new Error('Windows UI module configuration is missing. Set DC_WINDOWS_UI_PYTHON and DC_WINDOWS_UI_ROOT.');
+            }
+            console.log(' - ℹ️ Windows UI module is not configured');
+            return;
+        }
+
+        console.log(` - ⏳ Connecting to Windows UI module using: ${config.command} ${config.args.join(' ')}`);
+        try {
+            this.windowsUiTransport = new StdioClientTransport({
+                ...config,
+                env: { ...getDefaultEnvironment(), ...config.env }
+            });
+            this.windowsUiClient = new Client(
+                { name: 'grayson-windows-ui-client', version: '1.0.0' },
+                { capabilities: {} }
+            );
+            await this.windowsUiClient.connect(this.windowsUiTransport);
+            const tools = await this.windowsUiClient.listTools();
+            this.windowsUiToolNames = new Set((tools.tools || []).map(tool => tool.name));
+            if (this.windowsUiToolNames.size === 0) {
+                throw new Error('Windows UI module returned no tools');
+            }
+            console.log(` - 🟢 Connected to Windows UI module (${this.windowsUiToolNames.size} tools)`);
+        } catch (error) {
+            console.error(' - ❌ Failed to connect to Windows UI module:', error);
+            await captureRemote('windows_ui_integration_init_failed', { error });
+            await this.closeWindowsUi();
+            if (required) {
+                throw error;
+            }
         }
     }
 
@@ -124,6 +188,15 @@ export class DesktopCommanderIntegration {
         return null;
     }
 
+    private enqueueWindowsUiCall<T>(operation: () => Promise<T>): Promise<T> {
+        const run = this.windowsUiCallChain.then(operation, operation);
+        this.windowsUiCallChain = run.then(
+            () => undefined,
+            () => undefined
+        );
+        return run;
+    }
+
     async callClientTool(toolName: string, args: any, metadata?: any) {
         if (!this.isReady || !this.mcpClient) {
             console.debug('[DEBUG] callClientTool() failed - not ready or no client');
@@ -133,11 +206,20 @@ export class DesktopCommanderIntegration {
         // Proxy other tools to MCP server
         try {
             console.debug('[DEBUG] Calling MCP tool:', toolName, 'args:', JSON.stringify(args).substring(0, 100));
-            const result = await this.mcpClient.callTool({
+            const targetClient = this.windowsUiToolNames.has(toolName)
+                ? this.windowsUiClient
+                : this.mcpClient;
+            if (!targetClient) {
+                throw new Error(`MCP client for tool ${toolName} is not available`);
+            }
+            const execute = () => targetClient.callTool({
                 name: toolName,
                 arguments: args,
                 _meta: { remote: true, ...metadata || {} }
             } as any);
+            const result = this.windowsUiToolNames.has(toolName)
+                ? await this.enqueueWindowsUiCall(execute)
+                : await execute();
             console.debug('[DEBUG] Tool call successful:', toolName);
             return result;
         } catch (error) {
@@ -155,9 +237,17 @@ export class DesktopCommanderIntegration {
             // List tools from MCP server
             const mcpTools = await this.mcpClient.listTools();
 
-            // Merge tools
+            const windowsUiTools = this.windowsUiClient
+                ? (await this.windowsUiClient.listTools()).tools || []
+                : [];
+            const merged = new Map<string, any>();
+            for (const tool of [...(mcpTools.tools || []), ...windowsUiTools]) {
+                merged.set(tool.name, tool);
+            }
+
+            // Merge tools from the existing bridge and the local-only Windows UI sidecar.
             return {
-                tools: mcpTools.tools || []
+                tools: [...merged.values()]
             };
         } catch (error) {
             console.error('Error fetching capabilities:', error);
@@ -179,6 +269,8 @@ export class DesktopCommanderIntegration {
                 )
             ]);
         };
+
+        await this.closeWindowsUi(closeWithTimeout);
 
         if (this.mcpClient) {
             try {
@@ -216,5 +308,34 @@ export class DesktopCommanderIntegration {
 
         this.isReady = false;
         console.debug('[DEBUG] Desktop Commander integration shutdown complete');
+    }
+
+    private async closeWindowsUi(
+        closeWithTimeout?: (operation: () => Promise<void>, name: string, timeoutMs?: number) => Promise<void>
+    ) {
+        const close = closeWithTimeout || (async (operation: () => Promise<void>) => operation());
+        try {
+            await close(() => this.windowsUiCallChain, 'Windows UI call queue drain', 3000);
+        } catch (error: any) {
+            console.warn('  ⚠️ Windows UI call queue did not drain before shutdown:', error.message);
+        }
+        if (this.windowsUiClient) {
+            try {
+                await close(() => this.windowsUiClient!.close(), 'Windows UI client close', 3000);
+            } catch (error: any) {
+                console.warn('  ⚠️ Windows UI client close error:', error.message);
+            }
+            this.windowsUiClient = null;
+        }
+        if (this.windowsUiTransport) {
+            try {
+                await close(() => this.windowsUiTransport!.close(), 'Windows UI transport close', 3000);
+            } catch (error: any) {
+                console.warn('  ⚠️ Windows UI transport close error:', error.message);
+            }
+            this.windowsUiTransport = null;
+        }
+        this.windowsUiToolNames.clear();
+        this.windowsUiCallChain = Promise.resolve();
     }
 }

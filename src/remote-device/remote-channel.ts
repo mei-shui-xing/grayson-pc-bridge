@@ -50,9 +50,14 @@ export class RemoteChannel {
     private reconnectAttempt = 0;        // recreateChannel() attempts since last success
     private isRecreatingChannel = false; // a recreate is in flight (re-entrancy guard)
     private joiningSince: number | null = null; // ts the channel entered an unbroken 'joining' run; null when not joining
+    private statusListener: ((status: 'online' | 'offline') => void | Promise<void>) | null = null;
 
     private _user: User | null = null;
     get user(): User | null { return this._user; }
+
+    setStatusListener(listener: (status: 'online' | 'offline') => void | Promise<void>): void {
+        this.statusListener = listener;
+    }
 
 
     initialize(url: string, key: string): void {
@@ -496,6 +501,13 @@ export class RemoteChannel {
             return;
         } else {
             console.debug(`[DEBUG] Device status set to ${status}`);
+            if (this.statusListener) {
+                try {
+                    await this.statusListener(status);
+                } catch (listenerError: any) {
+                    console.debug('[DEBUG] Status listener failed:', listenerError?.message || listenerError);
+                }
+            }
         }
 
         // console.log(status === 'online' ? `🔌 Device marked as ${status}` : `❌ Device marked as ${status}`);
