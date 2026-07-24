@@ -1,6 +1,11 @@
 // Test script to verify search result behavior using new streaming API
 import { handleStartSearch, handleGetMoreSearchResults, handleStopSearch } from '../dist/handlers/search-handlers.js';
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { configManager } from '../dist/config-manager.js';
+
+const TEST_OUTPUT_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'test_output');
 
 /**
  * Helper function to wait for search completion and get all results
@@ -45,14 +50,17 @@ async function searchAndWaitForCompletion(searchArgs, timeout = 30000) {
 }
 
 async function testSearchTruncation() {
+    let originalConfig;
     try {
         console.log('Testing search result behavior with new streaming API...');
-        fs.mkdirSync('test/test_output', { recursive: true });
-        fs.writeFileSync('test/test_output/search-fixture.txt', 'const fixture = function () { return true; };\n'.repeat(200));
+        fs.mkdirSync(TEST_OUTPUT_DIR, { recursive: true });
+        fs.writeFileSync(path.join(TEST_OUTPUT_DIR, 'search-fixture.txt'), 'const fixture = function () { return true; };\n'.repeat(200));
+        originalConfig = await configManager.getConfig();
+        await configManager.setValue('allowedDirectories', [TEST_OUTPUT_DIR]);
         
         // Test search that will produce many results
         const searchArgs = {
-            path: 'test/test_output',
+            path: TEST_OUTPUT_DIR,
             pattern: 'function|const|let|var',  // This should match many lines
             searchType: 'content',
             maxResults: 50000,  // Very high limit to get lots of results
@@ -93,6 +101,8 @@ async function testSearchTruncation() {
     } catch (error) {
         console.error('Test failed:', error);
         throw error;
+    } finally {
+        if (originalConfig) await configManager.updateConfig(originalConfig);
     }
 }
 
