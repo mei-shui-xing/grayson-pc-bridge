@@ -1,10 +1,10 @@
 {
-  "name": "grayson-pc-bridge-alpha",
+  "name": "ai-desktop-control-bridge-alpha",
   "version": "0.1.0-alpha.1",
-  "description": "Local alpha fork of Desktop Commander with a safety-gated Windows UI sidecar",
-  "mcpName": "local.grayson.pc-bridge-alpha",
+  "description": "Windows-focused Desktop Commander fork with a safety-gated UI sidecar for compatible MCP clients",
+  "mcpName": "local.ai.desktop-control-bridge-alpha",
   "license": "MIT",
-  "author": "Grayson PC Bridge contributors; based on Desktop Commander by Eduards Ruzga and contributors",
+  "author": "AI Desktop Control Bridge contributors; based on Desktop Commander by Eduards Ruzga and contributors",
   "fork": {
     "upstreamName": "@wonderwhy-er/desktop-commander",
     "upstreamVersion": "0.2.46",
