@@ -7,7 +7,7 @@
 
 AI Desktop Control Bridge is a Windows-focused, safety-gated fork of [Desktop Commander MCP](https://github.com/wonderwhy-er/DesktopCommanderMCP). It preserves the upstream file, terminal, process, search, and preview tools, and adds a Windows UI sidecar for reading visible windows, taking screenshots, and operating allowlisted applications with mouse and keyboard input.
 
-This repository is an early `v0.1.0-alpha.1` source release for a small technical tester group. It is **GPT-first, not GPT-only** and can be used by compatible MCP clients.
+This repository is an early `v0.1.0-alpha.2` source release for a small technical tester group. It is **GPT-first, not GPT-only** and can be used by compatible MCP clients.
 
 ## Alpha operating policy
 

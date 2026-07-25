@@ -4,7 +4,7 @@
 
 AI Desktop Control Bridge adds screenshot, visible-window inspection, UI Automation, and mouse/keyboard tools to the upstream Desktop Commander capabilities.
 
-During `v0.1.0-alpha.1`:
+During `v0.1.0-alpha.2`:
 
 - Only one AI/client may control desktop input at a time. The local serial queue is not a computer-wide lock or lease.
 - Screenshot and coordinate fallback should be used only when structured file, terminal, window, or UI Automation tools cannot identify the target.
@@ -57,7 +57,7 @@ Additional practical steps:
 - File and terminal tools can reach beyond advisory restrictions through normal program execution.
 - UI classification cannot guarantee that every sensitive custom-rendered surface will be recognized.
 - The project does not protect against a compromised AI account or prompt injection reaching an authorized client.
-- `v0.1.0-alpha.1` has unresolved dependency advisories documented in [DEPENDENCY_AUDIT_ALPHA.md](DEPENDENCY_AUDIT_ALPHA.md).
+- `v0.1.0-alpha.2` has unresolved dependency advisories documented in [DEPENDENCY_AUDIT_ALPHA.md](DEPENDENCY_AUDIT_ALPHA.md).
 
 ## Reporting a vulnerability
 
