@@ -8,7 +8,7 @@ $bridgeRunning = $null -ne $bridge
 $uiProcess = Get-WindowsUiProcess
 $uiRunning = $null -ne $uiProcess
 
-Write-Host '=== Grayson电脑助手运行状态 ===' -ForegroundColor Cyan
+Write-Host '=== AI电脑助手运行状态 ===' -ForegroundColor Cyan
 Write-Host ("本地项目桥：{0}" -f $(if ($bridgeRunning) { "运行中（PID $($bridge.ProcessId)）" } else { '未运行' })) -ForegroundColor $(if ($bridgeRunning) { 'Green' } else { 'Red' })
 Write-Host ("Windows UI：{0}" -f $(if ($uiRunning) { "运行中（PID $($uiStatus.uiPid)）" } else { '未运行' })) -ForegroundColor $(if ($uiRunning) { 'Green' } else { 'Red' })
 Write-Host ("远程服务：{0}" -f $(if ($bridgeRunning -and $bridgeStatus.connected -eq $true) { '已连接' } elseif ($bridgeRunning) { '连接中/正在重连' } else { '离线' }))

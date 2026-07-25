@@ -115,7 +115,7 @@ export class DesktopCommanderIntegration {
                 env: { ...getDefaultEnvironment(), ...config.env }
             });
             this.windowsUiClient = new Client(
-                { name: 'grayson-windows-ui-client', version: '1.0.0' },
+                { name: 'ai-desktop-control-bridge-windows-ui-client', version: '1.0.0' },
                 { capabilities: {} }
             );
             await this.windowsUiClient.connect(this.windowsUiTransport);

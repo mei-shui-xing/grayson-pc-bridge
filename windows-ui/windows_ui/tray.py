@@ -25,9 +25,9 @@ class StatusTray:
     def __init__(self) -> None:
         initial = CONTROL.status()
         self.icon = pystray.Icon(
-            "GraysonComputerAssistant",
+            "AIDesktopControlBridge",
             _image(initial["state"]),
-            f"Grayson电脑助手 - {LABELS[initial['state']]}",
+            f"AI电脑助手 - {LABELS[initial['state']]}",
             menu=pystray.Menu(
                 pystray.MenuItem("暂停远程输入", self._pause),
                 pystray.MenuItem("本地恢复控制", self._resume),
@@ -49,10 +49,10 @@ class StatusTray:
     def _state_changed(self, status: dict[str, Any]) -> None:
         state = status["state"]
         self.icon.icon = _image(state)
-        self.icon.title = f"Grayson电脑助手 - {LABELS[state]}"
+        self.icon.title = f"AI电脑助手 - {LABELS[state]}"
         if state == "emergency":
             try:
-                self.icon.notify("远程鼠标键盘已紧急停止。只能在本机恢复。", "Grayson电脑助手")
+                self.icon.notify("远程鼠标键盘已紧急停止。只能在本机恢复。", "AI电脑助手")
             except Exception:
                 pass
 

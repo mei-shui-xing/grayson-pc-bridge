@@ -10,9 +10,6 @@ from pathlib import Path
 from typing import Any
 
 from .config import RUNTIME_DIR
-from .control_state import CONTROL
-
-
 COMMAND_PATH = RUNTIME_DIR / "local-command.json"
 RESPONSE_PATH = RUNTIME_DIR / "local-command-response.json"
 
@@ -30,6 +27,11 @@ class LocalCommandWatcher:
         self._stop.set()
 
     def _run(self) -> None:
+        # Import the process-owning state only inside the server watcher.  The
+        # standalone CLI also imports this module; importing CONTROL there
+        # would overwrite ui-status.json with the short-lived CLI process ID.
+        from .control_state import CONTROL
+
         while not self._stop.wait(0.2):
             try:
                 command = json.loads(COMMAND_PATH.read_text(encoding="utf-8"))

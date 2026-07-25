@@ -5,7 +5,7 @@ $launcherLog = Join-Path $LogsDir ("launcher-{0:yyyy-MM-dd}.log" -f (Get-Date))
 Start-Transcript -LiteralPath $launcherLog -Append | Out-Null
 
 try {
-    Write-Host '=== Grayson电脑助手启动检查 ===' -ForegroundColor Cyan
+    Write-Host '=== AI电脑助手启动检查 ===' -ForegroundColor Cyan
     if (-not (Test-Path -LiteralPath $ProjectRoot)) { throw "项目不存在：$ProjectRoot" }
     if (-not (Get-Command node.exe -ErrorAction SilentlyContinue)) { throw '未找到 Node.js。请安装 Node.js 18 或更高版本。' }
     $nodeMajor = [int]((& node.exe --version).TrimStart('v').Split('.')[0])
@@ -47,6 +47,7 @@ try {
     $env:WINDOWS_UI_CONFIG = Join-Path $WindowsUiRoot 'config\allowlist.json'
     $env:WINDOWS_UI_RUNTIME_DIR = $RuntimeDir
     $env:WINDOWS_UI_LOG_DIR = $LogsDir
+    $env:AI_DESKTOP_CONTROL_BRIDGE_RUNTIME_DIR = $RuntimeDir
     $env:GRAYSON_ASSISTANT_RUNTIME_DIR = $RuntimeDir
 
     $bridge = Start-Process -FilePath (Get-Command node.exe).Source `
@@ -80,7 +81,7 @@ try {
             Write-Host "截图能力：正常（$($screenshotHealth.backend)）"
             Write-Host "已注册工具：$($bridgeStatus.toolCount)"
             Write-Host ''
-            Write-Host '现在可以让 ChatGPT 操作电脑' -ForegroundColor Green
+            Write-Host '现在可以让当前 AI 客户端操作电脑' -ForegroundColor Green
             exit 0
         }
         if (-not $authHintShown -and (Get-Date) -gt $deadline.AddMinutes(-2.8)) {

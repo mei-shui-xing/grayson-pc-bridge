@@ -29,7 +29,7 @@ def parse_text(result) -> dict:
 async def main() -> None:
     RESULTS.mkdir(parents=True, exist_ok=True)
     RUNTIME.mkdir(parents=True, exist_ok=True)
-    original = "Grayson Windows UI Phase A\n"
+    original = "AI Desktop Control Bridge Windows UI Phase A\n"
     FIXTURE.write_text(original, encoding="utf-8")
     notepad = subprocess.Popen(["notepad.exe", str(FIXTURE)])
     try:

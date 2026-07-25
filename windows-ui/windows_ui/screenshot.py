@@ -75,7 +75,7 @@ def _capture_dxcam(rect: tuple[int, int, int, int]) -> Image.Image:
     # FastMCP runs synchronous tools in worker threads; constructing DXcam's
     # global COM factory in one of those threads can terminate the interpreter
     # instead of raising a Python exception on some GPU drivers.
-    handle, temp_name = tempfile.mkstemp(prefix="grayson-dxcam-", suffix=".png")
+    handle, temp_name = tempfile.mkstemp(prefix="ai-desktop-control-bridge-dxcam-", suffix=".png")
     os.close(handle)
     try:
         completed = subprocess.run(

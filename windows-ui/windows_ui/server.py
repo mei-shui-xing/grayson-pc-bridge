@@ -23,7 +23,7 @@ from .windows import focus_window, foreground_window, list_windows, monitors, re
 
 
 mcp = FastMCP(
-    "Grayson Windows UI",
+    "AI Desktop Control Bridge Windows UI",
     instructions=(
         "Safety-gated Windows desktop tools. Read-only window/screenshot tools remain available while paused. "
         "Mouse, keyboard, focus, and window-management tools require an active control state and an allowlisted target. "
@@ -173,7 +173,7 @@ def main() -> None:
         TRAY.start()
         LOCAL_COMMANDS.start()
         atexit.register(_shutdown)
-        print("Grayson Windows UI sidecar ready", file=sys.stderr, flush=True)
+        print("AI Desktop Control Bridge Windows UI sidecar ready", file=sys.stderr, flush=True)
         mcp.run(transport="stdio")
     finally:
         _shutdown()
