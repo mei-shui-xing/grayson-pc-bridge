@@ -67,3 +67,7 @@ AI Desktop Control Bridge（AI 电脑控制桥）是基于 [`wonderwhy-er/Deskto
 - 暂无电脑级全局主控租约、发布签名、自动更新通道和完整 SBOM 平台。
 - 自绘游戏或编辑器可能没有完整 UI Automation 节点，此时需要截图和坐标兜底。
 - 当前不包含 OCR、录屏、语音、自动支付、密码输入、注册表编辑或任意 PowerShell UI 自动化。
+
+## 相关项目
+
+抖音、Windows 电脑和 Android 手机三个 MCP 项目的统一入口：[mcp-tools-link-hub](https://github.com/mei-shui-xing/mcp-tools-link-hub)。
