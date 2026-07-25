@@ -69,3 +69,7 @@ This fork is distributed as source code only and does not publish under the upst
 - No computer-wide controller lease, release signing, automatic update channel, or complete SBOM platform yet.
 - Self-rendered games and editors may not expose complete UI Automation nodes and may require screenshot/coordinate fallback.
 - OCR, screen recording, voice control, automatic payment, password entry, registry editing, and arbitrary PowerShell UI automation are not included.
+
+## Related projects
+
+For the unified entry point to the Douyin, Windows PC, and Android phone MCP projects, see [mcp-tools-link-hub](https://github.com/mei-shui-xing/mcp-tools-link-hub).
