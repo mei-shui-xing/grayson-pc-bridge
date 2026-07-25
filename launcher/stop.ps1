@@ -1,7 +1,7 @@
 ﻿. (Join-Path $PSScriptRoot 'common.ps1')
 
 New-Item -ItemType Directory -Force -Path $RuntimeDir, $LogsDir | Out-Null
-Write-Host '=== 停止 Grayson电脑助手 ===' -ForegroundColor Cyan
+Write-Host '=== 停止 AI电脑助手 ===' -ForegroundColor Cyan
 $bridge = Get-BridgeProcess
 $uiStatus = Read-JsonFile $UiStatusFile
 

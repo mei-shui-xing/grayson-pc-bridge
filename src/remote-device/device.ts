@@ -32,7 +32,8 @@ export class MCPDevice {
         this.deviceId = undefined;
         this.isShuttingDown = false;
         this.configPath = path.join(os.homedir(), '.desktop-commander-device', 'device.json');
-        const runtimeDir = process.env.GRAYSON_ASSISTANT_RUNTIME_DIR
+        const runtimeDir = process.env.AI_DESKTOP_CONTROL_BRIDGE_RUNTIME_DIR
+            || process.env.GRAYSON_ASSISTANT_RUNTIME_DIR
             || path.join(os.homedir(), '.desktop-commander-device', 'runtime');
         this.runtimeStatusPath = path.join(runtimeDir, 'bridge-status.json');
         this.persistSession = options.persistSession || false;

@@ -13,11 +13,13 @@ if ($configuredProjectRoot -and (Test-Path -LiteralPath (Join-Path $configuredPr
 } elseif ($repoCandidate -and (Test-Path -LiteralPath (Join-Path $repoCandidate 'package.json'))) {
     $ProjectRoot = $repoCandidate
 } else {
-    throw '找不到 Grayson-PC-Bridge 项目目录。请从仓库内运行，或在 assistant.config.json 中填写 project_root。'
+    throw '找不到 AI Desktop Control Bridge 项目目录。请从仓库内运行，或在 assistant.config.json 中填写 project_root。'
 }
+$DefaultDesktopFolder = Join-Path ([Environment]::GetFolderPath('Desktop')) 'AI电脑助手'
+$LegacyDesktopFolder = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Grayson电脑助手'
 $DesktopFolder = [Environment]::ExpandEnvironmentVariables([string]$AssistantConfig.desktop_folder)
 if (-not $DesktopFolder) {
-    $DesktopFolder = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Grayson电脑助手'
+    $DesktopFolder = $DefaultDesktopFolder
 }
 $WindowsUiRoot = Join-Path $ProjectRoot 'windows-ui'
 $RuntimeDir = Join-Path $WindowsUiRoot 'runtime'
