@@ -1,3 +1,3 @@
-Grayson Windows UI Phase A
+AI Desktop Control Bridge Windows UI Phase A
 
 Windows UI 自动化阶段 A 测试通过

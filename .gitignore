@@ -67,7 +67,7 @@ windows-ui/runtime/
 windows-ui/test-results/runtime/
 windows-ui/test-results/*.jsonl
 
-# Grayson fork local state (never commit)
+# AI Desktop Control Bridge local state (never commit)
 .codex/
 .runtime/
 windows-ui/config/allowlist.json

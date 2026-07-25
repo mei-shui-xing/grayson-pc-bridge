@@ -173,7 +173,7 @@ def main() -> None:
         TRAY.start()
         LOCAL_COMMANDS.start()
         atexit.register(_shutdown)
-        print("Grayson Windows UI sidecar ready", file=sys.stderr, flush=True)
+        print("AI Desktop Control Bridge Windows UI sidecar ready", file=sys.stderr, flush=True)
         mcp.run(transport="stdio")
     finally:
         _shutdown()

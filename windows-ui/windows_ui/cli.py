@@ -8,7 +8,7 @@ from .local_control import send_local_command
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Local control commands for Grayson Windows UI")
+    parser = argparse.ArgumentParser(description="Local control commands for AI Desktop Control Bridge Windows UI")
     parser.add_argument("action", choices=["status", "pause", "resume", "emergency"])
     args = parser.parse_args()
     if args.action == "status":

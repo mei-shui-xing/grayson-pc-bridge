@@ -1,4 +1,4 @@
-# Grayson PC Bridge 公开发布检查清单
+# AI Desktop Control Bridge 公开发布检查清单
 
 ## 代码与测试
 

@@ -1,6 +1,6 @@
 > [!WARNING]
 > 本文件是上游 Desktop Commander 的 npm/MCP Registry 发布流程。
-> Grayson PC Bridge 不应使用上游包名、账号或 Registry 身份发布；当前仓库已设置 `private: true` 防止误发 npm。
+> AI Desktop Control Bridge 不应使用上游包名、账号或 Registry 身份发布；当前仓库已设置 `private: true` 防止误发 npm。
 
 # Publishing Guide for Desktop Commander MCP
 
