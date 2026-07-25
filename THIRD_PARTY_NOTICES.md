@@ -1,6 +1,6 @@
 # Third-party notices
 
-AI Desktop Control Bridge `v0.1.0-alpha.1` is a derivative fork. This file is a concise Alpha notice, not a replacement for the license files shipped by each dependency.
+AI Desktop Control Bridge `v0.1.0-alpha.2` is a derivative fork. This file is a concise Alpha notice, not a replacement for the license files shipped by each dependency.
 
 ## Primary upstream
 

@@ -5,7 +5,7 @@
 
 AI Desktop Control Bridge（AI 电脑控制桥）是基于 [`wonderwhy-er/DesktopCommanderMCP`](https://github.com/wonderwhy-er/DesktopCommanderMCP) 的 Windows 安全增强分支。它保留上游的文件、终端、进程、搜索和预览工具，并增加受白名单约束的 Windows UI sidecar，让兼容 MCP 的 AI 客户端能够读取可见窗口、截图，并执行鼠标键盘操作。
 
-当前版本是面向小范围技术测试者的源码 Alpha：`v0.1.0-alpha.1`。项目遵循 **GPT-first, not GPT-only**，并不绑定某一个 AI 客户端。
+当前版本是面向小范围技术测试者的源码 Alpha：`v0.1.0-alpha.2`。项目遵循 **GPT-first, not GPT-only**，并不绑定某一个 AI 客户端。
 
 ## Alpha 使用原则
 
